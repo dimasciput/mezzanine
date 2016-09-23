@@ -581,3 +581,12 @@ register_setting(
     editable=False,
     default="",
 )
+
+register_setting(
+    name="HIDE_DRAFT",
+    label=_("Hide Draft"),
+    description=_("Hide unpublished items for logged in users on front page."),
+    editable=True,
+    default=True,
+    translatable=True,
+)
