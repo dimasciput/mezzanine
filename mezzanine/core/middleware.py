@@ -35,9 +35,9 @@ class AdminLoginInterfaceSelectorMiddleware(MiddlewareMixin):
     """
     def process_view(self, request, view_func, view_args, view_kwargs):
         login_type = request.POST.get("mezzanine_login_interface")
-        if login_type and not request.user.is_authenticated():
+        if login_type and not request.user.is_authenticated:
             response = view_func(request, *view_args, **view_kwargs)
-            if request.user.is_authenticated():
+            if request.user.is_authenticated:
                 if login_type == "admin":
                     next = next_url(request) or request.get_full_path()
                     username = request.user.get_username()
@@ -132,7 +132,7 @@ class UpdateCacheMiddleware(MiddlewareMixin):
         # and the response mustn't include an expiry age, indicating it
         # shouldn't be cached.
         marked_for_update = getattr(request, "_update_cache", False)
-        anon = hasattr(request, "user") and not request.user.is_authenticated()
+        anon = hasattr(request, "user") and not request.user.is_authenticated
         timeout = get_max_age(response)
         if timeout is None:
             timeout = settings.CACHE_MIDDLEWARE_SECONDS
@@ -196,7 +196,7 @@ class FetchFromCacheMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         if (cache_installed() and request.method == "GET" and
-                not request.user.is_authenticated()):
+                not request.user.is_authenticated):
             cache_key = cache_key_prefix(request) + request.get_full_path()
             response = cache_get(cache_key)
             # We need to force a csrf token here, as new sessions
