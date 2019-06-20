@@ -30,7 +30,7 @@ class ThreadedComment(Comment):
 
     by_author = models.BooleanField(_("By the blog author"), default=False)
     replied_to = models.ForeignKey("self", null=True, editable=False,
-                                   related_name="comments")
+                                   related_name="comments", on_delete=models.CASCADE)
     rating = RatingField(verbose_name=_("Rating"))
 
     objects = CommentManager()
@@ -107,8 +107,8 @@ class AssignedKeyword(Orderable):
     """
 
     keyword = models.ForeignKey("Keyword", verbose_name=_("Keyword"),
-                                related_name="assignments")
-    content_type = models.ForeignKey("contenttypes.ContentType")
+                                related_name="assignments", on_delete=models.CASCADE)
+    content_type = models.ForeignKey("contenttypes.ContentType", on_delete=models.CASCADE)
     object_pk = models.IntegerField()
     content_object = GenericForeignKey("content_type", "object_pk")
 
@@ -127,11 +127,11 @@ class Rating(models.Model):
     value = models.IntegerField(_("Value"))
     rating_date = models.DateTimeField(_("Rating date"),
         auto_now_add=True, null=True)
-    content_type = models.ForeignKey("contenttypes.ContentType")
+    content_type = models.ForeignKey("contenttypes.ContentType", on_delete=models.CASCADE)
     object_pk = models.IntegerField()
     content_object = GenericForeignKey("content_type", "object_pk")
     user = models.ForeignKey(get_user_model_name(), verbose_name=_("Rater"),
-        null=True, related_name="%(class)ss")
+        null=True, related_name="%(class)ss", on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = _("Rating")

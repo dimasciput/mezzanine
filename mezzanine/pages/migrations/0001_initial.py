@@ -71,13 +71,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='page',
             name='parent',
-            field=models.ForeignKey(related_name='children', blank=True, to='pages.Page', null=True),
+            field=models.ForeignKey(related_name='children', blank=True, to='pages.Page', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='page',
             name='site',
-            field=models.ForeignKey(editable=False, to='sites.Site'),
+            field=models.ForeignKey(editable=False, to='sites.Site', on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

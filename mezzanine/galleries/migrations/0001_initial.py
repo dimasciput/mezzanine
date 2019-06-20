@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 ('_order', models.IntegerField(null=True, verbose_name='Order')),
                 ('file', mezzanine.core.fields.FileField(max_length=200, verbose_name='File')),
                 ('description', models.CharField(max_length=1000, verbose_name='Description', blank=True)),
-                ('gallery', models.ForeignKey(related_name='images', to='galleries.Gallery')),
+                ('gallery', models.ForeignKey(related_name='images', to='galleries.Gallery', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ('_order',),

@@ -150,7 +150,7 @@ class Tweet(models.Model):
         _("User name (Retweeted by)"), max_length=100, null=True)
     retweeter_full_name = models.CharField(
         _("Full name (Retweeted by)"), max_length=100, null=True)
-    query = models.ForeignKey("Query", related_name="tweets")
+    query = models.ForeignKey("Query", related_name="tweets", on_delete=models.CASCADE)
 
     objects = TweetManager()
 

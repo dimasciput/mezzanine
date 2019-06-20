@@ -46,7 +46,7 @@ class SiteRelated(models.Model):
     class Meta:
         abstract = True
 
-    site = models.ForeignKey("sites.Site", editable=False)
+    site = models.ForeignKey("sites.Site", editable=False, on_delete=models.CASCADE)
 
     def save(self, update_site=False, *args, **kwargs):
         """
@@ -486,7 +486,7 @@ class Ownable(models.Model):
     """
 
     user = models.ForeignKey(user_model_name, verbose_name=_("Author"),
-        related_name="%(class)ss")
+        related_name="%(class)ss", on_delete=models.CASCADE)
 
     class Meta:
         abstract = True

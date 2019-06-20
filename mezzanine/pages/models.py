@@ -41,7 +41,7 @@ class Page(BasePage, ContentTyped):
     """
 
     parent = models.ForeignKey("Page", blank=True, null=True,
-        related_name="children")
+        related_name="children", on_delete=models.CASCADE)
     in_menus = MenusField(_("Show in menus"), blank=True, null=True)
     titles = models.CharField(editable=False, max_length=1000, null=True)
     login_required = models.BooleanField(_("Login required"), default=False,
