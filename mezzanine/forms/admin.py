@@ -18,6 +18,7 @@ from django.utils.translation import ungettext, ugettext_lazy as _
 
 from mezzanine.conf import settings
 from mezzanine.core.admin import TabularDynamicInlineAdmin
+from mezzanine.core.forms import DynamicInlineAdminForm
 from mezzanine.forms.forms import EntriesForm
 from mezzanine.forms.models import Form, Field, FormEntry, FieldEntry
 from mezzanine.pages.admin import PageAdmin
@@ -39,13 +40,39 @@ if not settings.FORMS_USE_HTML5:
     inline_field_excludes += ["placeholder_text"]
 
 
+class FieldAdminInlineForm(DynamicInlineAdminForm):
+
+    def __init__(self, *args, **kwargs):
+        """
+        Ensure the label and help_text fields are rendered as text inputs
+        instead of text areas.
+        """
+        super(FieldAdminInlineForm, self).__init__(*args, **kwargs)
+        for name in self.fields:
+            # We just want to swap some textareas for inputs here, but
+            # there are some extra considerations for modeltranslation:
+            #   1) Form field names are suffixed with language,
+            #      eg help_text_en, so we check for the name as a prefix.
+            #   2) At this point, modeltranslation has also monkey-patched
+            #      on necessary CSS classes to the widget, so retain those.
+            if name.startswith("label") or name.startswith("help_text"):
+                css_class = self.fields[name].widget.attrs.get("class", None)
+                self.fields[name].widget = admin.widgets.AdminTextInputWidget()
+                if css_class:
+                    self.fields[name].widget.attrs["class"] = css_class
+
+    class Meta:
+        model = Field
+        exclude = inline_field_excludes
+
+
 class FieldAdmin(TabularDynamicInlineAdmin):
     """
     Admin class for the form field. Inherits from TabularDynamicInlineAdmin to
     add dynamic "Add another" link and drag/drop ordering.
     """
     model = Field
-    exclude = inline_field_excludes
+    form = FieldAdminInlineForm
 
 
 class FormAdmin(PageAdmin):
@@ -72,10 +99,10 @@ class FormAdmin(PageAdmin):
         """
         urls = super(FormAdmin, self).get_urls()
         extra_urls = [
-            url("^(?P<form_id>\d+)/entries/$",
+            url(r"^(?P<form_id>\d+)/entries/$",
                 self.admin_site.admin_view(self.entries_view),
                 name="form_entries"),
-            url("^file/(?P<field_entry_id>\d+)/$",
+            url(r"^file/(?P<field_entry_id>\d+)/$",
                 self.admin_site.admin_view(self.file_view),
                 name="form_file"),
         ]
@@ -142,10 +169,10 @@ class FormAdmin(PageAdmin):
         field_entry = get_object_or_404(FieldEntry, id=field_entry_id)
         path = join(fs.location, field_entry.value)
         response = HttpResponse(content_type=guess_type(path)[0])
-        f = open(path, "r+b")
-        response["Content-Disposition"] = "attachment; filename=%s" % f.name
-        response.write(f.read())
-        f.close()
+        with open(path, "r+b") as f:
+            response["Content-Disposition"] = ("attachment; filename=%s"
+                                               % f.name)
+            response.write(f.read())
         return response
 
 admin.site.register(Form, FormAdmin)

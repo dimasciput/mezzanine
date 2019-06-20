@@ -15,7 +15,7 @@ except ImportError:  # Python 2
 
 import re
 
-from bleach import clean, sanitizer
+from mezzanine.utils.deprecation import mark_safe
 
 
 SELF_CLOSING_TAGS = ['br', 'img']
@@ -31,10 +31,6 @@ ABSOLUTE_URL_TAGS = {"img": "src", "a": "href", "iframe": "src"}
 LOW_FILTER_TAGS = ("iframe", "embed", "video", "param", "source", "object")
 LOW_FILTER_ATTRS = ("allowfullscreen", "autostart", "loop", "hidden",
                     "playcount", "volume", "controls", "data", "classid")
-
-# https://github.com/mozilla/bleach/issues/102
-if "tel" not in sanitizer.BleachSanitizer.allowed_protocols:
-    sanitizer.BleachSanitizer.allowed_protocols += ["tel"]
 
 
 def absolute_urls(html):
@@ -80,15 +76,17 @@ def decode_entities(html):
             except KeyError:
                 pass
         return html
-    return re.sub("&#?\w+;", decode, html.replace("&amp;", "&"))
+    return re.sub(r"&#?\w+;", decode, html.replace("&amp;", "&"))
 
 
+@mark_safe
 def escape(html):
     """
     Escapes HTML according to the rules defined by the settings
     ``RICHTEXT_FILTER_LEVEL``, ``RICHTEXT_ALLOWED_TAGS``,
     ``RICHTEXT_ALLOWED_ATTRIBUTES``, ``RICHTEXT_ALLOWED_STYLES``.
     """
+    from bleach import clean, ALLOWED_PROTOCOLS
     from mezzanine.conf import settings
     from mezzanine.core import defaults
     if settings.RICHTEXT_FILTER_LEVEL == defaults.RICHTEXT_FILTER_LEVEL_NONE:
@@ -99,10 +97,14 @@ def escape(html):
     if settings.RICHTEXT_FILTER_LEVEL == defaults.RICHTEXT_FILTER_LEVEL_LOW:
         tags += LOW_FILTER_TAGS
         attrs += LOW_FILTER_ATTRS
+    if isinstance(attrs, tuple):
+        attrs = list(attrs)
     return clean(html, tags=tags, attributes=attrs, strip=True,
-                 strip_comments=False, styles=styles)
+                 strip_comments=False, styles=styles,
+                 protocols=ALLOWED_PROTOCOLS + ["tel"])
 
 
+@mark_safe
 def thumbnails(html):
     """
     Given a HTML string, converts paths in img tags to thumbnail
@@ -124,7 +126,7 @@ def thumbnails(html):
         src_in_media = src.lower().startswith(settings.MEDIA_URL.lower())
         width = img.get("width")
         height = img.get("height")
-        if src_in_media and width and height:
+        if src_in_media and str(width).isdigit() and str(height).isdigit():
             img["src"] = settings.MEDIA_URL + thumbnail(src, width, height)
     # BS adds closing br tags, which the browser interprets as br tags.
     return str(dom).replace("</br>", "")
