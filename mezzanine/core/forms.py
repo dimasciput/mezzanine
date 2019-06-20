@@ -4,7 +4,7 @@ from future.builtins import str
 from uuid import uuid4
 
 from django import forms
-from django.forms.extras.widgets import SelectDateWidget
+from django.forms import SelectDateWidget
 from django.utils.safestring import mark_safe
 
 from mezzanine.conf import settings
