@@ -7,7 +7,7 @@ try:
 except ImportError:
     from urlparse import urlparse
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from mezzanine.blog.models import BlogPost
 from mezzanine.conf import settings

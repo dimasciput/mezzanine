@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User as AuthUser
-from django.core.urlresolvers import NoReverseMatch
+from django.urls import NoReverseMatch
 from django.forms import ValidationError, ModelForm
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
